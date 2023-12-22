@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Mock Interview Signup</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: black;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 50px auto;
+      padding: 20px;
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: black;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .input-group {
+      margin-bottom: 15px;
+    }
+
+    label {
+      font-weight: bold;
+      margin-bottom: 5px;
+      color: #555;
+    }
+
+    input[type="text"],
+    select {
+      width: 100%;
+      padding: 8px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 4px;
+      background-color: black;
+      color: #fff;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: gray;
+    }
+
+    #interviewArea {
+      margin-top: 50px;
+    }
+
+    #codeArea {
+      display: none;
+      margin-top: 20px;
+    }
+
+    #codeArea textarea {
+      width: 100%;
+      height: 200px;
+      padding: 8px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+      font-family: 'Courier New', Courier, monospace;
+    }
+
+    #timer {
+      text-align: center;
+      font-size: 24px;
+      margin-top: 20px;
+      color: #555;
+    }
+    /* CSS for typing animation */
+      @keyframes typing {
+        from { width: 0; }
+      }
+
+      .typing-animation::after {
+        content: "|"; /* Cursor */
+        animation: typing 0.5s steps(1) infinite alternate;
+      }
+
+      @keyframes blink {
+        50% { opacity: 0; }
+      }
+
+      .typing-animation::after {
+        content: '|'; /* Cursor */
+        display: inline-block;
+        width: 0;
+        animation: typing 1s steps(30, end), blink 0.5s step-end infinite alternate;
+      }
+
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Welcome to Your Mock Interview</h1>
+    <form id="interviewForm">
+      <div class="input-group">
+        <label for="fullName">Your Name</label>
+        <input type="text" id="fullName" name="fullName" required>
+      </div>
+      <div class="input-group">
+        <label for="company">Company of Interest</label>
+        <select id="company" name="company" required>
+          <option value="" disabled selected>Select a company</option>
+          <option value="Meta">Meta</option>
+          <option value="Google">Google</option>
+          <option value="Amazon">Amazon</option>
+          <option value="Apple">Apple</option>
+          <option value="Netflix">Netflix</option>
+          <option value="JP Morgan Chase & Co">JP Morgan Chase & Co</option>
+          <!-- Add more companies as needed -->
+        </select>
+      </div>
+      <div class ="input-group">
+        <label for = "Language">Coding Language of Choice</label>
+        <select id="Language" name="Language" required>
+          <option value="" disabled selected>Select Language</option>
+          <option value="C++">C++</option>
+          <option value="Python">Python</option>
+          <option value="JavaScript">JavaScript</option>
+          <option value="Java">Java</option>
+          <!-- Add more companies as needed -->
+        </select>
+      </div>
+      <div class="input-group">
+        <label for="apiKey">OpenAI API Key</label>
+        <a target="_blank" rel="noopener noreferrer" href="https://platform.openai.com/api-keys">Get it here</a>
+        <input type="text" id="apiKey" name="apiKey" required>
+      </div>
+      <div class="input-group">
+        <button type="submit">Start Interview</button>
+      </div>
+    </form>
+    <div id="interviewArea">
+      <!-- Interview questions will be displayed here -->
+    </div>
+    <div id="codeArea">
+      <label for="userCode">Your Code..</label>
+      <textarea id="userCode" name="userCode" placeholder="Write your code here"></textarea>
+      <button id="submitCode" onclick="submitCode()">Submit</button>
+    </div>
+    <div id="timer"></div>
+  </div>
+
+  <script>
+    let currentQuestion = ''; // Keep track of the current question
+    let questionNumber = 0; // Track the question number
+  
+    // Function to display interview questions
+    function displayQuestion(question) {
+      currentQuestion = question;
+      const interviewArea = document.getElementById('interviewArea');
+      interviewArea.innerHTML = '' + '<h2>Question<h2>'; // Clear previous content
+
+      const questionElement = document.createElement('div');
+      questionElement.classList.add('typing-animation'); // Add a class for typing animation
+      interviewArea.appendChild(questionElement);
+
+      // Split the question text into characters and add them one by one with a delay
+      for (let i = 0; i < question.length; i++) {
+        setTimeout(() => {
+          questionElement.textContent += question[i];
+        }, 50 * i); // Adjust the delay as needed for typing speed
+      }
+
+      document.getElementById('codeArea').style.display = 'block'; // Show code input
+    }
+  
+    // Function to handle form submission
+    document.getElementById('interviewForm').addEventListener('submit', function(event) {
+      event.preventDefault();
+      const formData = new FormData(this);
+      fetch('/start_interview', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(Object.fromEntries(formData)),
+      })
+      .then(response => response.json())
+      .then(data => {
+        displayQuestion(data.question); // Display the first question
+        startTimer(60 * 60); // Start the timer for 1 hour
+      })
+      .catch(error => console.error('Error:', error));
+    });
+  
+    // Function to handle code submission
+    function submitCode() {
+      const code = document.getElementById('userCode').value;
+  
+      fetch('/check_code', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ code: code, questionNumber: questionNumber }),
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.hasOwnProperty('correct')) {
+          if (data.correct) {
+            if (data.next_question !== null) {
+              questionNumber++; // Increment question number
+              displayQuestion(data.next_question); // Display the next question
+              
+            } else {
+              alert('Interview finished!'); // Notify when all questions are completed
+            }
+          } else {
+            alert('Code is incorrect. Try again.'); // Notify if the code is incorrect
+          }
+        } else {
+          alert('Server error. Please try again.'); // Handle any unexpected server response
+        }
+      })
+      .catch(error => console.error('Error:', error));
+    }
+
+    // Function to start and display timer
+    function startTimer(duration) {
+      // Code to start and display the timer
+      let timer = duration, minutes, seconds;
+      const timerInterval = setInterval(function () {
+        minutes = parseInt(timer / 60, 10);
+        seconds = parseInt(timer % 60, 10);
+
+        minutes = minutes < 10 ? "0" + minutes : minutes;
+        seconds = seconds < 10 ? "0" + seconds : seconds;
+
+        document.getElementById('timer').textContent = minutes + ":" + seconds;
+
+        if (--timer < 0) {
+          clearInterval(timerInterval);
+          alert('Time\'s up! Interview finished.');
+        }
+      }, 1000);
+    }
+
+    // Function to handle form submission
+    document.getElementById('interviewForm').addEventListener('submit', function(event) {
+      event.preventDefault();
+      const formData = new FormData(this);
+      fetch('/start_interview', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(Object.fromEntries(formData)),
+      })
+      .then(response => response.json())
+      .then(data => {
+        displayQuestion(data.question); // Display the first question
+        startTimer(60 * 60); // Start the timer for 1 hour
+      })
+      .catch(error => console.error('Error:', error));
+    });
+  </script>
+</body>
+</html>
