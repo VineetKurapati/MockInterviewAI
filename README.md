@@ -24,14 +24,13 @@ This Flask-based web application serves as a platform for conducting mock interv
 
 ### Build and Run the Docker Image:
 
-```bash
 docker build -t mock-interview-app .
 docker run -p 5000:5000 -d mock-interview-app
 
- Access the App:
+### Access the App:
 Visit http://localhost:5000 in your web browser to start using the app.
 
-Usage
+### Usage
 
 Setup:
 Enter your name, choose a company of interest, and provide your OpenAI API key to initialize the interview.
