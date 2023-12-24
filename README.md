@@ -1,6 +1,4 @@
-# Mock Interview Flask App with OpenAI Integration
-
-![Mock Interview App](mock-interview.png)
+# AI powered Mock Interview App
 
 ## Overview
 
